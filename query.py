@@ -23,14 +23,18 @@ init_app()
 # 1. What is the datatype of the returned value of
 # ``Brand.query.filter_by(name='Ford')``?
 
-# An instance method
+# A query object
 
 
 # 2. In your own words, what is an association table, and what type of
 # relationship (many to one, many to many, one to one, etc.) does an
 # association table manage?
 
-
+# An association table does not hold any meaningful data itself, but rather
+# creates a meaningful relationship between two other tables of data that
+# have meaning on their own. Association tables manage many-to-many
+# relationships between tables through foreign keys, creating a
+# many-to-one relationship with itself to each table.
 
 
 # -------------------------------------------------------------------
@@ -54,14 +58,14 @@ q4 = db.session.query(Brand).filter(Brand.founded > 1920).all()
 q5 = db.session.query(Model).filter(Model.name.like('Cor%')).all()
 
 # Get all brands that were founded in 1903 and that are not yet discontinued.
-q6 = db.session.query(Brand).filter(Brand.founded == 1903, Brand.discontinued == None).all()
+q6 = db.session.query(Brand).filter(Brand.founded == 1903, Brand.discontinued.is_(None)).all()
 
 # Get all brands that are either 1) discontinued (at any time) or 2) founded
 # before 1950.
-q7 = None
+q7 = db.session.query(Brand).filter((Brand.discontinued.isnot(None)) | (Brand.founded < 1950)).all()
 
 # Get all models whose brand_id is not ``for``.
-q8 = None
+q8 = Model.query.filter(Model.brand_id != 'for').all()
 
 
 
@@ -94,12 +98,11 @@ def search_brands_by_name(mystr):
     """Returns all Brand objects corresponding to brands whose names include
     the given string."""
 
-    pass
+    return db.session.query(Brand).filter(Brand.name.like('%' + mystr + '%')).all()
 
 
 def get_models_between(start_year, end_year):
     """Returns all Model objects corresponding to models made between
     start_year (inclusive) and end_year (exclusive)."""
 
-    pass
-
+    return db.session.query(Model).filter(Model.year >= start_year, Model.year < end_year).all()
